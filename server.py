@@ -143,6 +143,12 @@ class GameHub:
         if not isinstance(data, dict):
             return
         typ = data.get("t")
+        # Lightweight round-trip-time diagnostic. Does not affect game input relay.
+        if typ == "ping":
+            stamp = data.get("ts")
+            if isinstance(stamp, (int, float)) and 0 <= stamp <= 10**15:
+                await self.send(player, {"t": "pong", "ts": stamp})
+            return
         if typ == "hello":
             player.name = safe_name(data.get("name"), 16)
             room = self.current_room(player)
